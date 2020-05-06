@@ -5,7 +5,8 @@ Proposal for Spline
 Basic information
 =================
 
-The GitHub repository (URL) hosting your term project.
+It will be a branch of https://github.com/PhoenixDL/rising
+But can also be an extern standalone Repository, if required.
 
 Extend a data augmentation library for 2D and 3D data written in PyTorch by a package of algorithms for image registration.
 
