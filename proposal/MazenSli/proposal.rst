@@ -66,7 +66,10 @@ References
 ==========
 
 https://depts.washington.edu/bicg/documents/MII_registration10.pdf
+
 https://medium.com/sicara/image-registration-sift-deep-learning-3c794d794b7a
+
 https://www.mathworks.com/discovery/image-registration.html
+
 https://github.com/PhoenixDL/rising
 
