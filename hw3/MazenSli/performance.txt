@@ -1,0 +1,5 @@
+Performance test for matrix multiplication
+Matrix 1: 1277x1205
+Matrix 2: 1205x1577
+multiply_naive: 33.388458013534546 s
+multiply_mkl: 0.14189815521240234 s

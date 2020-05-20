@@ -37,6 +37,13 @@ public:
         }
     }
 
+    Matrix(std::vector<std::vector<double>> const & other)
+        : m_nrow(other.size()), m_ncol(other[0].size())
+    {
+        for(const auto &v: other)
+            m_buffer.insert(m_buffer.end(), v.begin(), v.end());
+    }
+
     /* Define the copy constructor */
     Matrix(Matrix const &other)
         : m_nrow(other.m_nrow), m_ncol(other.m_ncol)
@@ -107,13 +114,21 @@ public:
     // With bound check.
     double operator()(size_t row, size_t col) const
     {
-        check_range(row, col);
+        //check_range(row, col);
         return m_buffer[row * m_ncol + col];
     }
     double &operator()(size_t row, size_t col)
     {
-        check_range(row, col);
+        //check_range(row, col);
         return m_buffer[row * m_ncol + col];
+    }
+
+    bool operator== (Matrix const &other)
+    {
+        if (this == &other) return true;
+        if (m_nrow != other.m_nrow || m_ncol != other.m_ncol) return false;
+        if (m_buffer == other.m_buffer) return true;
+        else return false;
     }
 
     size_t nrow() const { return m_nrow; }
@@ -191,26 +206,6 @@ std::ostream &operator<<(std::ostream &ostr, Matrix const &mat)
     return ostr;
 }
 
-int main(int argc, char *argv[])
-{
-    Matrix A(2, 2);
-    A(0, 0) = 1;
-    A(1, 0) = 2;
-    A(1, 1) = 3;
-    A(0, 1) = 4;
-
-    Matrix B(2, 2, std::vector<double>{1, 2, 3, 4});
-
-    std::cout << "matrix A (2x3):" << A << std::endl;
-    std::cout << "matrix D (2x3):" << B << std::endl;
-
-    Matrix C = multiply_naive(A, B);
-
-    std::cout << "Matrix multiplication: A*B = " << C << std::endl;
-
-    return 0;
-}
-
 PYBIND11_MODULE(_matrix, m)
 {
     m.doc() = "pybind11 example plugin"; // optional module docstring
@@ -221,25 +216,29 @@ PYBIND11_MODULE(_matrix, m)
     py::class_<Matrix>(m, "Matrix", py::buffer_protocol())
         .def(py::init<size_t, size_t>())
         .def(py::init<size_t, size_t, std::vector<double>>())
+	.def(py::init<std::vector<std::vector<double>>&>())
         .def(py::init<Matrix const &>())
         .def_property("nrow", &Matrix::nrow, nullptr)
         .def_property("ncol", &Matrix::ncol, nullptr)
         .def_buffer([](Matrix &m) -> py::buffer_info {
             return py::buffer_info(
-                m.m_buffer.data(),                                /* Pointer to buffer */
+                m.m_buffer.data(),                       /* Pointer to buffer */
                 sizeof(double),                          /* Size of one scalar */
                 py::format_descriptor<double>::format(), /* Python struct-style format descriptor */
                 2,                                       /* Number of dimensions */
                 {m.nrow(), m.ncol()},                    /* Buffer dimensions */
                 {sizeof(double) * m.ncol(),              /* Strides (in bytes) for each index */
-                sizeof(double)}
-	    );
+                 sizeof(double)});
+        })
+	.def("__eq__", &Matrix::operator==)
+	.def("__setitem__", [](Matrix &A, std::pair<size_t, size_t> p, float value) {
+	A(p.first, p.second) = value;
 	})
         .def("__getitem__", [](Matrix &A, std::pair<size_t, size_t> p) {
             if (p.first >= A.nrow() || p.second >= A.ncol())
-	    {
+            {
                 throw py::index_error();
-	    }
+            }
             return A(p.first, p.second);
         });
 }
